@@ -6,33 +6,45 @@ typedef long long ll;
 using namespace std;
 
 int main() {
-    // setup
-    int n, q, k, u, a, b = 0;
+    int n, q, k, a, b = 0; // array size, # of queries, idx to be updated, lower sum range, upper sum range
+    ll u = 0; // updated value
     cin >> n >> q;
-    ll arr[n + 1];
-    ll orig_arr[n];
+    ll arr[n * 2]; //segment tree setup (index 0 never used)
 
-    // main
-    arr[0] = 0; // fill first slot of array
-    for (int i = 1; i <= n; ++i) {
-        cin >> orig_arr[i - 1]; // keep an intact version of the original input array to be cahnged by 2ku
-        arr[i] = orig_arr[i - 1];
-        arr[i] += arr[i - 1]; // add previous entry to current to create an increasing list of numbers
+    for (int i = n; i < (n * 2); ++i) { // add elements to the right half of the array
+        cin >> arr[i];
     }
 
-    int tmp = 0;
+    for (int i = (n - 1); i > 0; --i) { // add parent elements of the segment tree
+        arr[i] = (arr[(2 * i)] + arr[(2 * i) + 1]);
+    }
+
+    int sel = 0; // selector for input(1 || 2) aka update array or find value
     for (int i = 0; i < q; ++i) {
-        cin >> tmp;
-        if (tmp == 2) {
-            cin >> a >> b;
-            // print (must be like this and not an array of answers bc of big number overflow stuff)
-            cout << (arr[b] - arr[a - 1]) << "\n"; // super clever and smart math
-        } else /*tmp == 1*/ {
+        cin >> sel;
+        if (sel == 1) { // update array 
             cin >> k >> u;
-            for (int j = k; j <= n; ++j) { // for every idx of arr from k to the end,
-                arr[j] -= (orig_arr[k - 1] - u); // update arr to reflect 2ku change
+            k += n - 1;
+            arr[k] = u;
+            for (k /= 2; k > 0; k /= 2) { // update the seg tree (in O(log(n)) time)
+                arr[k] = (arr[(2 * k)] + arr[(2 * k) + 1]);
             }
-            orig_arr[k - 1] = u; // make 2ku change in original array
+        } else { // get sum of range
+            cin >> a >> b;
+            a += n - 1;
+            b += n - 1;
+            ll sum = 0;
+            while (a <= b) {
+                if ((a % 2) == 1) {
+                    sum += arr[a++ /* use then increment */];
+                }
+                if ((b % 2) == 0) {
+                    sum += arr[b-- /* use then decrement */];
+                }
+                a /= 2;
+                b /= 2; // O(log(n))
+            }
+            cout << sum << "\n";
         }
     }
 }
