@@ -1,33 +1,46 @@
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 
 typedef long long ll;
 
 using namespace std;
 
-struct node {
-    int parent = 0;
-    int subs = 0; // # of subordinates
+// all employees eventually answer to employee #1 (at least in all the test cases they do)
+// there is always at least one employee with no subordinates aka no circles (again at least in all the test cases)
+
+struct employee {
+    vector<int> childs;
+    int subs = -1; // # of subordinates, -1 for unknown
 };
 
 int main() {
     // setup
     int n = 0; // # of employees
     cin >> n;
-    node tree[n + 1]; 
+    employee tree[n + 1]; 
+
+    for (int i = 2; i <= n; ++i) {
+        int tmp = 0;
+        cin >> tmp;
+        tree[tmp].childs.push_back(i); // at this new employee's direct superior, add this employee's employee number to their list of children 
+    }
 
     // main
-    int tmp = 0;
-    for (int i = 0; i < (n - 1); ++i) {
-        cin >> tree[i + 2].parent;
-        int j = i + 2;
-        while (j != 1) {
-            tree[tree[j].parent].subs++; // add 1 to the parent of the new employee since they have a new subordinate
-            j = tree[j].parent; // update subindex 'j' 
+    // find an employee with no subs
+    int x; // index of an employee w no subs
+    for (int i = n; i >= 1; --i) {
+        if (tree[i].childs.size() == 0) {
+            tree[i].subs = 0;
+            x = i;
+            break;
         }
     }
 
-    //print 
+    // todo
+
+
+    // print 
     for (int i = 1; i <= n; ++i) {
         cout << tree[i].subs << " ";
     }
